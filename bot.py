@@ -41,13 +41,22 @@ def init_vision_client():
     """Initialise le client Google Vision"""
     global vision_client
     try:
+        if not GOOGLE_CREDENTIALS_JSON:
+            logger.error("GOOGLE_APPLICATION_CREDENTIALS vide!")
+            return
+        
         # Charger les credentials depuis le JSON en variable d'environnement
+        logger.info("Chargement des credentials Google Vision...")
         credentials_info = json.loads(GOOGLE_CREDENTIALS_JSON)
         credentials = service_account.Credentials.from_service_account_info(credentials_info)
         vision_client = vision.ImageAnnotatorClient(credentials=credentials)
-        logger.info("Google Vision initialisé avec succès")
+        logger.info("Google Vision initialisé avec succès ✓")
+    except json.JSONDecodeError as e:
+        logger.error(f"Erreur parsing JSON credentials: {e}")
     except Exception as e:
         logger.error(f"Erreur initialisation Google Vision: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
 
 def extract_text_from_image(image_bytes):
     """Extrait le texte d'une image avec Google Vision OCR"""
