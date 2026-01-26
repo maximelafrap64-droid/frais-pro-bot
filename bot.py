@@ -4,9 +4,11 @@ import json
 import re
 from datetime import datetime
 from io import BytesIO
+import tempfile
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
 from google.cloud import vision
+from google.oauth2 import service_account
 import pandas as pd
 
 # Configuration du logging
@@ -15,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 # Configuration
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-GOOGLE_APPLICATION_CREDENTIALS = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+GOOGLE_CREDENTIALS_JSON = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
 
 # Catégories de frais
 CATEGORIES = [
@@ -39,7 +41,10 @@ def init_vision_client():
     """Initialise le client Google Vision"""
     global vision_client
     try:
-        vision_client = vision.ImageAnnotatorClient()
+        # Charger les credentials depuis le JSON en variable d'environnement
+        credentials_info = json.loads(GOOGLE_CREDENTIALS_JSON)
+        credentials = service_account.Credentials.from_service_account_info(credentials_info)
+        vision_client = vision.ImageAnnotatorClient(credentials=credentials)
         logger.info("Google Vision initialisé avec succès")
     except Exception as e:
         logger.error(f"Erreur initialisation Google Vision: {e}")
