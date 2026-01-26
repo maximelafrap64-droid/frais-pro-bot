@@ -349,7 +349,9 @@ async def recap_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             par_categorie[cat] = []
         par_categorie[cat].append(frais)
     
-    for cat, items in par_categorie.items():
+    # Trier par catégorie et afficher
+    for cat in sorted(par_categorie.keys()):
+        items = par_categorie[cat]
         total_cat = sum(f['montant'] for f in items)
         msg += f"*{cat}* : {total_cat:.2f}€ ({len(items)} ticket{'s' if len(items) > 1 else ''})\n"
     
